@@ -1,0 +1,9 @@
+WIDTH = 1200
+HEIGHT = 600
+CAPTION = "Solo Chess"
+COLOR = (0, 0, 0)
+FPS = 60
+
+B_LEFTTOP = (350, 50)
+B_STRETCH = (500, 500)
+B_COLOR = (255, 255, 255)
