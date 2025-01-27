@@ -25,7 +25,7 @@ class GameAssembly:
             if e.dict["key"] == K_ESCAPE:
                 self.exit()
             elif e.dict["key"] == K_F11:
-                self.surface.toggle_fullscreen()
+                self.surface.switchFull()
 
     def update(self):
         self.board.update()

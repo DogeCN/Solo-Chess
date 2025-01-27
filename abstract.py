@@ -8,12 +8,20 @@ class Screen(Surface):
         self.screen = display.set_mode(SIZE)
         display.set_caption(CAPTION)
 
-    def toggle_fullscreen(self):
+    def drawGradient(self, color1, color2):
+        for y in range(SIZE[1]):
+            ratio = y / SIZE[1]
+            r = int(color1[0] * (1 - ratio) + color2[0] * ratio)
+            g = int(color1[1] * (1 - ratio) + color2[1] * ratio)
+            b = int(color1[2] * (1 - ratio) + color2[2] * ratio)
+            draw.line(self, (r, g, b), (0, y), (SIZE[0], y))
+
+    def switchFull(self):
         display.toggle_fullscreen()
 
     def draw(self):
         self.screen.blit(self, (0, 0))
-        self.fill(BLACK)
+        self.drawGradient(BLACK, GREY)
         display.flip()
 
 

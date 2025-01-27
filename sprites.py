@@ -25,7 +25,7 @@ class ChessCell(AnimatedTrapezoid):
         elif self.clicked:
             super().draw(GREEN)
         else:
-            super().draw(GRAY)
+            super().draw(SILVER)
 
 
 class Board(AnimatedTrapezoid):
