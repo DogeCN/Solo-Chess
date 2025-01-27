@@ -17,7 +17,7 @@ class Screen(Surface):
         display.flip()
 
 
-class Text(font.Font):
+class AnimatedText(font.Font):
     def __init__(
         self,
         surface: Surface,
@@ -34,7 +34,13 @@ class Text(font.Font):
 
     def draw(self):
         render = self.render(self.text, True, self.color)
-        self.surface.blit(render, self.pos)
+        size = render.get_size()
+        pos = mouse.get_pos()
+        delta = (
+            min(WIDTH / (pos[0] + self.pos[0]), WIDTH / size[0]) * 2,
+            min(HEIGHT / (pos[1] + self.pos[0]), HEIGHT / size[1]) * 2,
+        )
+        self.surface.blit(render, (self.pos[0] + delta[0], self.pos[1] + delta[1]))
 
 
 class Trapezoid(Rect):

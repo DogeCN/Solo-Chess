@@ -11,7 +11,7 @@ class GameAssembly:
         self.surface = Screen()
         self.clock = time.Clock()
         self.board = Board(self.surface)
-        self.fps = Text(
+        self.fps = AnimatedText(
             self.surface,
             (50, 50),
             36,
