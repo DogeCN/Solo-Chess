@@ -124,3 +124,24 @@ class AnimatedTrapezoid(Trapezoid):
         self.recover()
         pos = mouse.get_pos()
         self.resize(pos)
+
+    def calcIntensity(self, pos, point):
+        dx = pos[0] - point[0]
+        dy = pos[1] - point[1]
+        distance = (dx**2 + dy**2) ** 0.5
+        intensity = max(0, min(1, 1 - distance / LIGHT_RADIUS))
+        return intensity
+
+    def light(self, color):
+        pos = mouse.get_pos()
+        intensity = sum(self.calcIntensity(pos, point) for point in self.points) / 4
+        return (
+            min(255, int(color[0] * intensity)),
+            min(255, int(color[1] * intensity)),
+            min(255, int(color[2] * intensity)),
+        )
+
+    def draw(self, color):
+        if LIGHT:
+            color = self.light(color)
+        return super().draw(color)

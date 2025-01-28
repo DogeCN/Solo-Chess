@@ -19,13 +19,11 @@ class ChessCell(AnimatedTrapezoid):
             self.clicked = not pressed.index(True)
 
     def draw(self):
-        pos = mouse.get_pos()
-        if self.collidepoint(pos):
-            super().draw(YELLOW)
-        elif self.clicked:
-            super().draw(GREEN)
-        else:
-            super().draw(SILVER)
+        super().draw(
+            YELLOW
+            if self.collidepoint(mouse.get_pos())
+            else GREEN if self.clicked else SILVER
+        )
 
 
 class Board(AnimatedTrapezoid):
@@ -42,7 +40,6 @@ class Board(AnimatedTrapezoid):
                 frame.update()
 
     def draw(self):
-        super().draw(WHITE)
         for row in self.frames:
             for frame in row:
                 frame.draw()
