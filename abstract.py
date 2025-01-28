@@ -1,5 +1,5 @@
 from pygame import *
-from constants import *
+from values import *
 
 
 class Screen(Surface):
@@ -45,8 +45,10 @@ class AnimatedText(font.Font):
         size = render.get_size()
         pos = mouse.get_pos()
         delta = (
-            min(WIDTH / (pos[0] + self.pos[0]), WIDTH / size[0]) * 2,
-            min(HEIGHT / (pos[1] + self.pos[0]), HEIGHT / size[1]) * 2,
+            min(WIDTH / (pos[0] + self.pos[0]), WIDTH / size[0]) * Mutable.SHRINK * 40,
+            min(HEIGHT / (pos[1] + self.pos[1]), HEIGHT / size[1])
+            * Mutable.SHRINK
+            * 40,
         )
         self.surface.blit(render, (self.pos[0] + delta[0], self.pos[1] + delta[1]))
 
@@ -109,7 +111,9 @@ class AnimatedTrapezoid(Trapezoid):
         dx = point[0] - pos[0]
         dy = point[1] - pos[1]
         distance = ((dx**2) + (dy**2)) ** 0.5
-        shrink = SHRINK * (distance / ((CENTER[0] ** 2 + CENTER[1] ** 2) ** 0.5))
+        shrink = Mutable.SHRINK * (
+            distance / ((CENTER[0] ** 2 + CENTER[1] ** 2) ** 0.5)
+        )
         x = point[0] - dx * shrink
         y = point[1] - dy * shrink
         return (x, y)
@@ -129,7 +133,7 @@ class AnimatedTrapezoid(Trapezoid):
         dx = pos[0] - point[0]
         dy = pos[1] - point[1]
         distance = (dx**2 + dy**2) ** 0.5
-        intensity = max(0, min(1, 1 - distance / LIGHT_RADIUS))
+        intensity = max(0, min(1, 1 - distance / Mutable.LIGHT_RADIUS))
         return intensity
 
     def light(self, color):

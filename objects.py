@@ -1,5 +1,5 @@
 from pygame import *
-from constants import *
+from values import *
 from abstract import *
 
 
