@@ -6,7 +6,7 @@ class Screen(Surface):
 
     def __init__(self):
         super().__init__(SIZE)
-        self.screen = display.set_mode(SIZE)
+        self.screen = display.set_mode(SIZE, RESIZABLE)
         display.set_caption(CAPTION)
 
     def switchFull(self):
@@ -17,14 +17,12 @@ class Screen(Surface):
         size = self.screen.get_size()
         pos_ = pos[:]
         for i in range(2):
-            pos[i] = pos[i] * size[i] // SIZE[i]
-        if pos != pos_:
-            print(pos, pos_)
+            pos[i] = pos[i] / size[i] * SIZE[i]
         return pos
 
     def draw(self):
         display.flip()
-        self.screen.blit(transform.scale(self, self.screen.get_size()), (0, 0))
+        self.screen.blit(transform.smoothscale(self, self.screen.get_size()), (0, 0))
         drawGradient(self, SIZE, BLACK, GREY)
 
 
