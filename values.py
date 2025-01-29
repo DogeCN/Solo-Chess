@@ -1,12 +1,12 @@
-WIDTH = 1200
-HEIGHT = 600
+WIDTH = 1156
+HEIGHT = 650
 SIZE = (WIDTH, HEIGHT)
 CENTER = (WIDTH // 2, HEIGHT // 2)
 CAPTION = "Solo Chess"
 FPS = 60
 
-B_TOPLEFT = (350, 50)
 B_SIZE = (500, 500)
+B_TOPLEFT = [(SIZE[i] - B_SIZE[i]) // 2 for i in range(2)]
 C_SIZE = (50, 50)
 COLUMN = B_SIZE[0] // C_SIZE[0]
 ROW = B_SIZE[1] // C_SIZE[1]
@@ -19,11 +19,14 @@ MAX_DELTA_RATE = 10
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (50, 50, 50)
+DEEP_GREY = (20, 20, 20)
 SILVER = (128, 128, 128)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
 
 LIGHT = True
+OFFSET_RADIUS = 100
+BLUR = 5
 
 
 class Mutable:

@@ -4,7 +4,7 @@ from abstract import *
 
 
 class ChessCell(AnimatedTrapezoid):
-    def __init__(self, surface: Surface, c, r):
+    def __init__(self, surface: Screen, c, r):
         super().__init__(
             surface,
             (B_TOPLEFT[0] + c * C_SIZE[1], B_TOPLEFT[1] + r * C_SIZE[0]),
@@ -15,31 +15,47 @@ class ChessCell(AnimatedTrapezoid):
     def update(self):
         super().update()
         pressed = mouse.get_pressed()
-        if True in pressed and self.collidepoint(mouse.get_pos()):
+        if True in pressed and self.collidepoint(self.surface.getPos()):
             self.clicked = not pressed.index(True)
 
     def draw(self):
         super().draw(
             YELLOW
-            if self.collidepoint(mouse.get_pos())
+            if self.collidepoint(self.surface.getPos())
             else GREEN if self.clicked else SILVER
         )
+        self.drawGrid(GREY)
 
 
 class Board(AnimatedTrapezoid):
-    def __init__(self, surface):
+    def __init__(self, surface: Screen):
         super().__init__(surface, B_TOPLEFT, B_SIZE)
         self.frames = [
             [ChessCell(surface, c, r) for c in range(COLUMN)] for r in range(ROW)
         ]
 
+    def offset(self):
+        pos = self.surface.getPos()
+        for i in range(4):
+            point = list(self.points[i])
+            for j in range(2):
+                point[j] = (
+                    point[j]
+                    + (pos[j] - CENTER[j])
+                    / SIZE[j]
+                    * (OFFSET_RADIUS * Mutable.LIGHT_RADIUS * Mutable.SHRINK) ** 0.5
+                )
+            self.points[i] = tuple(point)
+
     def update(self):
         super().update()
+        self.offset()
         for row in self.frames:
             for frame in row:
                 frame.update()
 
     def draw(self):
+        super().draw(DEEP_GREY)
         for row in self.frames:
             for frame in row:
                 frame.draw()

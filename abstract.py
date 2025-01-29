@@ -1,28 +1,31 @@
-from pygame import *
+from methods import *
 from values import *
 
 
 class Screen(Surface):
+
     def __init__(self):
         super().__init__(SIZE)
         self.screen = display.set_mode(SIZE)
         display.set_caption(CAPTION)
 
-    def drawGradient(self, top, bottom):
-        for y in range(SIZE[1]):
-            ratio = y / SIZE[1]
-            r = int(top[0] * (1 - ratio) + bottom[0] * ratio)
-            g = int(top[1] * (1 - ratio) + bottom[1] * ratio)
-            b = int(top[2] * (1 - ratio) + bottom[2] * ratio)
-            draw.line(self, (r, g, b), (0, y), (SIZE[0], y))
-
     def switchFull(self):
         display.toggle_fullscreen()
 
+    def getPos(self):
+        pos = list(mouse.get_pos())
+        size = self.screen.get_size()
+        pos_ = pos[:]
+        for i in range(2):
+            pos[i] = pos[i] * size[i] // SIZE[i]
+        if pos != pos_:
+            print(pos, pos_)
+        return pos
+
     def draw(self):
         display.flip()
-        self.screen.blit(self, (0, 0))
-        self.drawGradient(BLACK, GREY)
+        self.screen.blit(transform.scale(self, self.screen.get_size()), (0, 0))
+        drawGradient(self, SIZE, BLACK, GREY)
 
 
 class TextRender(font.Font):
@@ -42,7 +45,7 @@ class TextRender(font.Font):
 
 class AnimatedTextGroup(Surface):
 
-    def __init__(self, surface: Surface, pos=(0, 0), mode=VERTICAL, space=5):
+    def __init__(self, surface: Screen, pos=(0, 0), mode=VERTICAL, space=5):
         super().__init__(SIZE, SRCALPHA)
         self.surface = surface
         self.pos = pos
@@ -51,7 +54,7 @@ class AnimatedTextGroup(Surface):
 
     def calcPos(self):
         size = self.get_bounding_rect().size
-        pos = mouse.get_pos()
+        pos = self.surface.getPos()
         return [
             self.pos[i]
             + min(SIZE[i] / (pos[i] + 1), MAX_DELTA_RATE) * size[i] * Mutable.SHRINK
@@ -72,7 +75,7 @@ class AnimatedTextGroup(Surface):
 
 
 class Trapezoid(Rect):
-    def __init__(self, surface):
+    def __init__(self, surface: Screen):
         self.points = [(0, 0)] * 4
         self.surface = surface
 
@@ -108,12 +111,21 @@ class Trapezoid(Rect):
     def bottomLeft(self, value):
         self.points[3] = value
 
+    def drawLine(self, start, end, color, width=1):
+        draw.line(self.surface, color, start, end, width)
+
+    def drawGrid(self, color):
+        self.drawLine(self.topLeft, self.topRight, color)
+        self.drawLine(self.topRight, self.bottomRight, color)
+        self.drawLine(self.bottomRight, self.bottomLeft, color)
+        self.drawLine(self.bottomLeft, self.topLeft, color)
+
     def draw(self, color):
         return draw.polygon(self.surface, color, self.points)
 
 
 class AnimatedTrapezoid(Trapezoid):
-    def __init__(self, surface, topleft, size):
+    def __init__(self, surface: Screen, topleft, size):
         super().__init__(surface)
         self.topleft = topleft
         self.size = size
@@ -125,7 +137,7 @@ class AnimatedTrapezoid(Trapezoid):
         self.bottomRight = self.bottomright
         self.bottomLeft = self.bottomleft
 
-    def adjust_point(self, point, pos):
+    def adjustPoint(self, point, pos):
         dx = point[0] - pos[0]
         dy = point[1] - pos[1]
         distance = ((dx**2) + (dy**2)) ** 0.5
@@ -137,14 +149,12 @@ class AnimatedTrapezoid(Trapezoid):
         return (x, y)
 
     def resize(self, pos):
-        self.topLeft = self.adjust_point(self.topLeft, pos)
-        self.topRight = self.adjust_point(self.topRight, pos)
-        self.bottomRight = self.adjust_point(self.bottomRight, pos)
-        self.bottomLeft = self.adjust_point(self.bottomLeft, pos)
+        for i in range(4):
+            self.points[i] = self.adjustPoint(self.points[i], pos)
 
     def update(self):
         self.recover()
-        pos = mouse.get_pos()
+        pos = self.surface.getPos()
         self.resize(pos)
 
     def calcIntensity(self, pos, point):
@@ -155,13 +165,9 @@ class AnimatedTrapezoid(Trapezoid):
         return intensity
 
     def light(self, color):
-        pos = mouse.get_pos()
+        pos = self.surface.getPos()
         intensity = sum(self.calcIntensity(pos, point) for point in self.points) / 4
-        return (
-            min(255, int(color[0] * intensity)),
-            min(255, int(color[1] * intensity)),
-            min(255, int(color[2] * intensity)),
-        )
+        return [min(255, int(c * intensity)) for c in color]
 
     def draw(self, color):
         if LIGHT:
