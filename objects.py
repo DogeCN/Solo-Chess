@@ -43,3 +43,19 @@ class Board(AnimatedTrapezoid):
         for row in self.frames:
             for frame in row:
                 frame.draw()
+
+
+class Values(AnimatedTextGroup):
+    def __init__(self, surface, pos=(0, 0), mode=VERTICAL, space=5):
+        super().__init__(surface, pos, mode, space)
+        self.fps = TextRender(36)
+        self.shrink = TextRender(30)
+        self.light = TextRender(30)
+
+    def update(self, fps):
+        self.fps.text = "FPS: %i" % fps
+        self.shrink.text = "Shrink: %.2f" % Mutable.SHRINK
+        self.light.text = "Light: %2.f" % Mutable.LIGHT_RADIUS
+
+    def draw(self):
+        super().draw(self.fps, self.shrink, self.light)

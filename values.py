@@ -12,6 +12,9 @@ COLUMN = B_SIZE[0] // C_SIZE[0]
 ROW = B_SIZE[1] // C_SIZE[1]
 
 DEFAULT_SIZE = 36
+HORIZONTAL = 0
+VERTICAL = 1
+MAX_DELTA_RATE = 10
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -31,7 +34,7 @@ class Mutable:
     _SHRINK = 0.05
     SHRINK_SPEED = 0.05
     SHRINK_MAX = 5
-    SHRINK_MIN = 0.001
+    SHRINK_MIN = 0
 
     @property
     def SHRINK(self):

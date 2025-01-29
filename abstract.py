@@ -8,49 +8,67 @@ class Screen(Surface):
         self.screen = display.set_mode(SIZE)
         display.set_caption(CAPTION)
 
-    def drawGradient(self, color1, color2):
+    def drawGradient(self, top, bottom):
         for y in range(SIZE[1]):
             ratio = y / SIZE[1]
-            r = int(color1[0] * (1 - ratio) + color2[0] * ratio)
-            g = int(color1[1] * (1 - ratio) + color2[1] * ratio)
-            b = int(color1[2] * (1 - ratio) + color2[2] * ratio)
+            r = int(top[0] * (1 - ratio) + bottom[0] * ratio)
+            g = int(top[1] * (1 - ratio) + bottom[1] * ratio)
+            b = int(top[2] * (1 - ratio) + bottom[2] * ratio)
             draw.line(self, (r, g, b), (0, y), (SIZE[0], y))
 
     def switchFull(self):
         display.toggle_fullscreen()
 
     def draw(self):
+        display.flip()
         self.screen.blit(self, (0, 0))
         self.drawGradient(BLACK, GREY)
-        display.flip()
 
 
-class AnimatedText(font.Font):
+class TextRender(font.Font):
     def __init__(
         self,
-        surface: Surface,
-        pos=(0, 0),
         size=DEFAULT_SIZE,
         color=WHITE,
         text="",
     ):
         super().__init__(None, size)
-        self.surface = surface
         self.color = color
         self.text = text
-        self.pos = pos
 
-    def draw(self):
-        render = self.render(self.text, True, self.color)
-        size = render.get_size()
+    def render(self):
+        return super().render(self.text, True, self.color)
+
+
+class AnimatedTextGroup(Surface):
+
+    def __init__(self, surface: Surface, pos=(0, 0), mode=VERTICAL, space=5):
+        super().__init__(SIZE, SRCALPHA)
+        self.surface = surface
+        self.pos = pos
+        self.mode = mode
+        self.space = space
+
+    def calcPos(self):
+        size = self.get_bounding_rect().size
         pos = mouse.get_pos()
-        delta = (
-            min(WIDTH / (pos[0] + self.pos[0]), WIDTH / size[0]) * Mutable.SHRINK * 40,
-            min(HEIGHT / (pos[1] + self.pos[1]), HEIGHT / size[1])
-            * Mutable.SHRINK
-            * 40,
-        )
-        self.surface.blit(render, (self.pos[0] + delta[0], self.pos[1] + delta[1]))
+        return [
+            self.pos[i]
+            + min(SIZE[i] / (pos[i] + 1), MAX_DELTA_RATE) * size[i] * Mutable.SHRINK
+            for i in range(2)
+        ]
+
+    def draw(self, *renders: TextRender):
+        pos = [0, 0]
+        self.fill((0, 0, 0, 0))
+        for t in renders:
+            rendered = t.render()
+            self.blit(rendered, pos)
+            if self.mode == VERTICAL:
+                pos[1] += rendered.get_height() + self.space
+            elif self.mode == HORIZONTAL:
+                pos[0] += rendered.get_width() + self.space
+        self.surface.blit(self, self.calcPos())
 
 
 class Trapezoid(Rect):
