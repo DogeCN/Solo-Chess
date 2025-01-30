@@ -5,11 +5,16 @@ CENTER = (WIDTH // 2, HEIGHT // 2)
 CAPTION = "Solo Chess"
 FPS = 60
 
-B_SIZE = (500, 500)
+B_SIZE = (540, 540)
 B_TOPLEFT = [(SIZE[i] - B_SIZE[i]) // 2 for i in range(2)]
-C_SIZE = (50, 50)
-COLUMN = B_SIZE[0] // C_SIZE[0]
-ROW = B_SIZE[1] // C_SIZE[1]
+C_GROUP = (3, 3)
+C_INSIDE = (3, 3)
+COLUMN = C_GROUP[0] * C_INSIDE[0]
+ROW = C_GROUP[1] * C_INSIDE[1]
+C_SIZE = (B_SIZE[0] // COLUMN, B_SIZE[1] // ROW)
+
+LINE_WIDTH = 1
+BORDER_WIDTH = 3
 
 DEFAULT_SIZE = 36
 HORIZONTAL = 0

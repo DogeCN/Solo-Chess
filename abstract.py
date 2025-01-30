@@ -109,7 +109,7 @@ class Trapezoid(Rect):
     def bottomLeft(self, value):
         self.points[3] = value
 
-    def drawLine(self, start, end, color, width=1):
+    def drawLine(self, start, end, color, width=LINE_WIDTH):
         draw.line(self.surface, color, start, end, width)
 
     def drawGrid(self, color):
