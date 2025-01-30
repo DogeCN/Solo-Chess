@@ -5,7 +5,7 @@ from values import *
 class Screen(Surface):
 
     def __init__(self):
-        super().__init__(SIZE)
+        super().__init__(SIZE, SRCALPHA)
         self.screen = display.set_mode(SIZE, RESIZABLE)
         display.set_caption(CAPTION)
 
@@ -21,9 +21,9 @@ class Screen(Surface):
         return pos
 
     def draw(self):
-        display.flip()
         self.screen.blit(transform.smoothscale(self, self.screen.get_size()), (0, 0))
         drawGradient(self, SIZE, BLACK, GREY)
+        display.flip()
 
 
 class TextRender(font.Font):
@@ -168,6 +168,4 @@ class AnimatedTrapezoid(Trapezoid):
         return [min(255, int(c * intensity)) for c in color]
 
     def draw(self, color):
-        if LIGHT:
-            color = self.light(color)
         return super().draw(color)

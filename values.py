@@ -5,13 +5,13 @@ CENTER = (WIDTH // 2, HEIGHT // 2)
 CAPTION = "Solo Chess"
 FPS = 60
 
-B_SIZE = (540, 540)
-B_TOPLEFT = [(SIZE[i] - B_SIZE[i]) // 2 for i in range(2)]
+C_SIZE = (70, 70)
 C_GROUP = (3, 3)
 C_INSIDE = (3, 3)
 COLUMN = C_GROUP[0] * C_INSIDE[0]
 ROW = C_GROUP[1] * C_INSIDE[1]
-C_SIZE = (B_SIZE[0] // COLUMN, B_SIZE[1] // ROW)
+B_SIZE = (C_SIZE[0] * COLUMN, C_SIZE[1] * ROW)
+B_TOPLEFT = [(SIZE[i] - B_SIZE[i]) // 2 for i in range(2)]
 
 LINE_WIDTH = 1
 BORDER_WIDTH = 3
@@ -26,15 +26,16 @@ WHITE = (255, 255, 255)
 GREY = (50, 50, 50)
 DEEP_GREY = (20, 20, 20)
 SILVER = (128, 128, 128)
-YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
+YELLOW_ALPHA = (255, 255, 0, 100)
+RED_ALPHA = (255, 0, 0, 100)
 
-LIGHT = True
 OFFSET_RADIUS = 100
 BLUR = 5
 
 
 class Mutable:
+    LIGHT = True
     _LIGHT_RADIUS = 1000
     LIGHT_RADIUS_SPEED = 100
     LIGHT_RADIUS_MAX = 10000

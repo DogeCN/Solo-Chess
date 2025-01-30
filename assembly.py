@@ -18,11 +18,13 @@ class GameAssembly:
                 self.exit()
             elif e.dict["key"] == K_F11:
                 self.surface.switchFull()
+            elif e.dict["key"] == K_LALT:
+                Mutable.LIGHT = not Mutable.LIGHT
         elif e.type == MOUSEWHEEL:
             val = e.dict["y"]
             if key.get_pressed()[K_LCTRL]:
                 Mutable.SHRINK += val * Mutable.SHRINK_SPEED
-            else:
+            elif Mutable.LIGHT:
                 Mutable.LIGHT_RADIUS += val * Mutable.LIGHT_RADIUS_SPEED
 
     def update(self):
