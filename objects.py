@@ -24,7 +24,7 @@ class ChessCell(AnimatedTrapezoid):
             self.drawLine(self.topLeft, self.topRight, color, BORDER_WIDTH)
 
     def draw(self):
-        super().draw(self.light(self.color) if Mutable.LIGHT else self.color)
+        super().draw(self.color)
         self.drawGrid(GREY)
 
 

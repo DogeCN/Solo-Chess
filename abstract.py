@@ -15,10 +15,7 @@ class Screen(Surface):
     def getPos(self):
         pos = list(mouse.get_pos())
         size = self.screen.get_size()
-        pos_ = pos[:]
-        for i in range(2):
-            pos[i] = pos[i] / size[i] * SIZE[i]
-        return pos
+        return [pos[i] / size[i] * SIZE[i] for i in range(2)]
 
     def draw(self):
         self.screen.blit(transform.smoothscale(self, self.screen.get_size()), (0, 0))
@@ -27,12 +24,7 @@ class Screen(Surface):
 
 
 class TextRender(font.Font):
-    def __init__(
-        self,
-        size=DEFAULT_SIZE,
-        color=WHITE,
-        text="",
-    ):
+    def __init__(self, size=DEFAULT_SIZE, color=WHITE, text=""):
         super().__init__(None, size)
         self.color = color
         self.text = text
@@ -119,7 +111,7 @@ class Trapezoid(Rect):
         self.drawLine(self.bottomLeft, self.topLeft, color)
 
     def draw(self, color):
-        return draw.polygon(self.surface, color, self.points)
+        draw.polygon(self.surface, color, self.points)
 
 
 class AnimatedTrapezoid(Trapezoid):
@@ -136,15 +128,10 @@ class AnimatedTrapezoid(Trapezoid):
         self.bottomLeft = self.bottomleft
 
     def adjustPoint(self, point, pos):
-        dx = point[0] - pos[0]
-        dy = point[1] - pos[1]
-        distance = ((dx**2) + (dy**2)) ** 0.5
-        shrink = Mutable.SHRINK * (
-            distance / ((CENTER[0] ** 2 + CENTER[1] ** 2) ** 0.5)
-        )
-        x = point[0] - dx * shrink
-        y = point[1] - dy * shrink
-        return (x, y)
+        delta = [point[i] - pos[i] for i in range(2)]
+        distance = triangle(*delta)
+        shrink = Mutable.SHRINK * (distance / triangle(*CENTER))
+        return [point[i] - delta[i] * shrink for i in range(2)]
 
     def resize(self, pos):
         for i in range(4):
@@ -155,17 +142,17 @@ class AnimatedTrapezoid(Trapezoid):
         pos = self.surface.getPos()
         self.resize(pos)
 
-    def calcIntensity(self, pos, point):
-        dx = pos[0] - point[0]
-        dy = pos[1] - point[1]
-        distance = (dx**2 + dy**2) ** 0.5
-        intensity = max(0, min(1, 1 - distance / Mutable.LIGHT_RADIUS))
-        return intensity
-
     def light(self, color):
         pos = self.surface.getPos()
-        intensity = sum(self.calcIntensity(pos, point) for point in self.points) / 4
+        intensity = (
+            sum(
+                calcIntensity(pos, point, Mutable.LIGHT_RADIUS) for point in self.points
+            )
+            / 4
+        )
         return [min(255, int(c * intensity)) for c in color]
 
     def draw(self, color):
-        return super().draw(color)
+        if Mutable.LIGHT:
+            color = self.light(color)
+        super().draw(color)

@@ -5,7 +5,7 @@ CENTER = (WIDTH // 2, HEIGHT // 2)
 CAPTION = "Solo Chess"
 FPS = 60
 
-C_SIZE = (70, 70)
+C_SIZE = (65, 65)
 C_GROUP = (3, 3)
 C_INSIDE = (3, 3)
 COLUMN = C_GROUP[0] * C_INSIDE[0]
