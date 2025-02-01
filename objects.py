@@ -24,23 +24,16 @@ class ChessCell(AnimatedTrapezoid):
 
     def update(self):
         super().update()
-        self.color = None
-        self.allowed = True
+        self.color = SILVER
 
     def draw(self):
-        if not self.allowed:
-            color = RED
-        elif self.index:
-            color = INDEXES[self.index]
-        elif self.color:
-            color = self.color
-        else:
-            color = INDEXES[0]
-        super().draw(color)
+        super().draw(self.color)
         self.drawGrid(GREY)
 
 
 class ChessGroup:
+    index = 0
+
     def __init__(self, globals: "Globals", surface: Screen, c, r):
         self.globals = globals
         self.col, self.row = c, r
@@ -50,8 +43,33 @@ class ChessGroup:
             for r in range(C_INSIDE[1])
         ]
 
-    def isChild(self, cell: ChessCell):
+    def has(self, cell: ChessCell):
         return cell in self.cells
+
+    def isMatched(self, cell: ChessCell):
+        return cell.col == self.col and cell.row == self.row
+
+    def check(self):
+        cells: list[list[ChessCell]] = [[] for _ in range(2)]
+        for cell in self.cells:
+            if cell.index:
+                cells[cell.index - 1].append(cell)
+        for i in range(2):
+            p = cells[i]
+            if len(p) >= 3:
+                rows = set()
+                cols = set()
+                ldiagonals = set()
+                rdiagonals = set()
+                for cell in p:
+                    rows.add(cell.row)
+                    cols.add(cell.col)
+                    ldiagonals.add(cell.col + cell.row)
+                    rdiagonals.add(cell.col - cell.row)
+                for prob in [rows, cols, ldiagonals, rdiagonals]:
+                    if len(prob) == 1:
+                        self.index = i + 1
+                        return
 
     def draw(self):
         for cell in self.cells:
@@ -73,68 +91,68 @@ class Globals:
             for r in range(C_GROUP[1])
         ]
 
-    def match(self, group: ChessGroup, cell: ChessCell):
-        matched = (
-            self.current
-            and group.col == self.current.col
-            and group.row == self.current.row
-        )
-        if matched:
-            self.matched = group
-        if self.fixed:
-            if matched and cell.allowed or self.fixed is group:
-                cell.color = RED
-
-    def set(self, current: ChessCell):
-        self.current = current
-        if self.getAllowed(current):
-            current.allowed = True
-            current.color = INDEXES[self.player]
-        else:
-            current.allowed = False
-
-    def getAllowed(self, current: ChessCell):
-        return (
-            self.fixed
-            and self.fixed.isChild(current)
-            and not current.index
-            or not current.index
-        )
-
-    def click(self, cell: ChessCell):
-        cell.index = self.player
-        self.player = 3 - self.player
+    def get(self, col: int, row: int):
+        return self.cells[col + row * C_GROUP[0]]
 
     def press(self):
-        pos = self.surface.getPos()
-        for cell in self.cells:
-            if cell.collidepoint(pos):
-                self.pressing = cell
+        if self.current and self.allow(self.current):
+            self.pressing = self.current
 
     def release(self):
-        pos = self.surface.getPos()
-        for cell in self.cells:
-            if cell.collidepoint(pos) and self.pressing is cell and cell.allowed:
-                self.click(cell)
-                self.fixed = self.matched
-                break
-        else:
-            self.pressing = None
+        current = self.current
+        if self.pressing is current is not None:
+            current.index = self.player
+            self.fixed = self.matched
+            self.player = 3 - self.player
+        self.pressing = None
 
-    @property
-    def cells(self):
-        for group in self.groups:
-            for cell in group.cells:
-                yield cell
+    def allow(self, cell: ChessCell):
+        if self.fixed:
+            return self.fixed.has(cell) and not cell.index
+        return True
+
+    def color(self, group: ChessGroup, cell: ChessCell):
+        color = SILVER
+        oncur = self.current is cell
+        if self.matched and self.matched.has(cell):
+            color = YELLOW
+        elif self.fixed and self.fixed.has(cell):
+            color = RED
+        if cell.index:
+            color = INDEXES[cell.index]
+            if oncur:
+                color = RED
+        else:
+            if oncur:
+                if self.allow(cell):
+                    color = INDEXES[self.player]
+                else:
+                    color = RED
+        if group.index:
+            color = INDEXES[group.index]
+            if oncur:
+                color = RED
+        cell.color = color
 
     def update(self):
+        self.matched = self.current = None
         pos = self.surface.getPos()
         for group in self.groups:
             for cell in group.cells:
                 cell.update()
-                self.match(group, cell)
                 if cell.collidepoint(pos):
-                    self.set(cell)
+                    self.current = cell
+        for group in self.groups:
+            group.check()
+            if (
+                self.current
+                and self.allow(self.current)
+                and group.isMatched(self.current)
+            ):
+                self.matched = group
+        for group in self.groups:
+            for cell in group.cells:
+                self.color(group, cell)
 
     def draw(self):
         for group in self.groups:
