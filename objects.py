@@ -61,20 +61,18 @@ class ChessGroup:
                 cells[cell.index - 1].append(cell)
         for i in range(2):
             p = cells[i]
-            if len(p) >= 3:
-                rows = set()
-                cols = set()
-                ldiagonals = set()
-                rdiagonals = set()
+            if len(p) >= CONST:
+                probs = [[] for _ in range(4)]
                 for cell in p:
-                    rows.add(cell.row)
-                    cols.add(cell.col)
-                    ldiagonals.add(cell.col + cell.row)
-                    rdiagonals.add(cell.col - cell.row)
-                for prob in [rows, cols, ldiagonals, rdiagonals]:
-                    if len(prob) == 1:
-                        self.setIndex(i + 1)
-                        return True
+                    probs[0].append(cell.col)
+                    probs[1].append(cell.row)
+                    probs[2].append(cell.col + cell.row)
+                    probs[3].append(cell.col - cell.row)
+                for prob in probs:
+                    for p in prob:
+                        if prob.count(p) >= CONST:
+                            self.setIndex(i + 1)
+                            return True
 
     def draw(self):
         for cell in self.cells:
@@ -102,42 +100,51 @@ class Globals:
         for group in self.groups:
             group.setIndex(index)
 
+    def reset(self):
+        self.setIndex(0)
+        self.player = 1
+        self.fixed = None
+
     def check(self):
         res = False
         groups: list[list[ChessGroup]] = [[] for _ in range(2)]
         for group in self.groups:
-            if group.check():
+            if not group.index and group.check():
                 res = True
             if group.index:
                 groups[group.index - 1].append(group)
         for i in range(2):
             p = groups[i]
-            if len(p) >= 3:
-                rows = set()
-                cols = set()
-                ldiagonals = set()
-                rdiagonals = set()
+            if len(p) >= CONST:
+                probs = [[] for _ in range(4)]
                 for group in p:
-                    rows.add(group.row)
-                    cols.add(group.col)
-                    ldiagonals.add(group.col + group.row)
-                    rdiagonals.add(group.col - group.row)
-                for prob in [rows, cols, ldiagonals, rdiagonals]:
-                    if len(prob) == 1:
-                        self.setIndex(i + 1)
-                        return True
+                    probs[0].append(group.row)
+                    probs[1].append(group.col)
+                    probs[2].append(group.col + group.row)
+                    probs[3].append(group.col - group.row)
+                for prob in probs:
+                    for p in prob:
+                        if prob.count(p) >= CONST:
+                            self.setIndex(i + 1)
+                            return True
         return res
 
     def press(self):
         if self.current and self.allow(self.current):
             self.pressing = self.current
+        elif self.index:
+            self.reset()
 
     def release(self):
         current = self.current
         if self.pressing is current is not None:
             current.index = self.player
-            self.player = 3 - self.player
-            self.fixed = None if self.check() or self.matched.index else self.matched
+            self.player = len(INDEXES) - self.player
+            a1 = self.check()
+            a2 = self.matched.index
+            a = a1 or a2
+            self.fixed = None if a else self.matched
+            print(self.fixed, a, a1, a2)
         self.pressing = None
 
     def allow(self, cell: ChessCell):

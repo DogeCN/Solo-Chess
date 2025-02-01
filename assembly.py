@@ -18,12 +18,15 @@ class GameAssembly:
         elif e.type == MOUSEBUTTONUP and e.dict["button"] == BUTTON_LEFT:
             self.board.globals.release()
         elif e.type == KEYDOWN:
-            if e.dict["key"] == K_ESCAPE:
+            key_ = e.dict["key"]
+            if key_ == K_ESCAPE:
                 self.exit()
-            elif e.dict["key"] == K_F11:
+            elif key_ == K_F11:
                 self.surface.switchFull()
-            elif e.dict["key"] == K_LALT:
+            elif key_ == K_LALT:
                 Mutable.LIGHT = not Mutable.LIGHT
+            elif key_ == K_r:
+                self.board.globals.reset()
         elif e.type == MOUSEWHEEL:
             val = e.dict["y"]
             if key.get_pressed()[K_LCTRL]:
