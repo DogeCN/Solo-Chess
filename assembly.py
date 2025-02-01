@@ -13,6 +13,10 @@ class GameAssembly:
     def emit(self, e: Event):
         if e.type == QUIT:
             self.exit()
+        elif e.type == MOUSEBUTTONDOWN and e.dict["button"] == BUTTON_LEFT:
+            self.board.globals.press()
+        elif e.type == MOUSEBUTTONUP and e.dict["button"] == BUTTON_LEFT:
+            self.board.globals.release()
         elif e.type == KEYDOWN:
             if e.dict["key"] == K_ESCAPE:
                 self.exit()

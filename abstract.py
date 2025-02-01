@@ -15,7 +15,7 @@ class Screen(Surface):
     def getPos(self):
         pos = list(mouse.get_pos())
         size = self.screen.get_size()
-        return [pos[i] / size[i] * SIZE[i] for i in range(2)]
+        return [pos[i] * SIZE[i] // size[i] for i in range(2)]
 
     def draw(self):
         self.screen.blit(transform.smoothscale(self, self.screen.get_size()), (0, 0))

@@ -4,8 +4,7 @@ from abstract import *
 
 
 class ChessCell(AnimatedTrapezoid):
-    clicked = False
-    color = SILVER
+    index = 0
 
     def __init__(self, group: "ChessGroup", surface: Screen, c, r):
         self.group = group
@@ -23,14 +22,25 @@ class ChessCell(AnimatedTrapezoid):
         if self.group.row and not self.row:
             self.drawLine(self.topLeft, self.topRight, color, BORDER_WIDTH)
 
+    def update(self):
+        super().update()
+        self.color = None
+        self.allowed = True
+
     def draw(self):
-        super().draw(self.color)
+        if not self.allowed:
+            color = RED
+        elif self.index:
+            color = INDEXES[self.index]
+        elif self.color:
+            color = self.color
+        else:
+            color = INDEXES[0]
+        super().draw(color)
         self.drawGrid(GREY)
 
 
 class ChessGroup:
-    matched = False
-
     def __init__(self, globals: "Globals", surface: Screen, c, r):
         self.globals = globals
         self.col, self.row = c, r
@@ -40,23 +50,8 @@ class ChessGroup:
             for r in range(C_INSIDE[1])
         ]
 
-    def calcColor(self, cell: ChessCell, pos):
-        color = SILVER
-        if self.matched:
-            color = RED_ALPHA
-        if cell.collidepoint(pos):
-            color = YELLOW_ALPHA
-            self.globals.match(cell.col, cell.row)
-        elif cell.clicked:
-            color = GREEN
-        return color
-
-    def update(self, pressed: list, pos):
-        for cell in self.cells:
-            cell.update()
-            if True in pressed and cell.collidepoint(pos):
-                cell.clicked = not pressed.index(True)
-            cell.color = self.calcColor(cell, pos)
+    def isChild(self, cell: ChessCell):
+        return cell in self.cells
 
     def draw(self):
         for cell in self.cells:
@@ -64,6 +59,12 @@ class ChessGroup:
 
 
 class Globals:
+    matched: ChessGroup = None
+    fixed: ChessGroup = None
+    current: ChessCell = None
+    pressing: ChessCell = None
+    player = 1
+
     def __init__(self, surface: Screen):
         self.surface = surface
         self.groups = [
@@ -72,15 +73,68 @@ class Globals:
             for r in range(C_GROUP[1])
         ]
 
-    def match(self, c: int, r: int):
+    def match(self, group: ChessGroup, cell: ChessCell):
+        matched = (
+            self.current
+            and group.col == self.current.col
+            and group.row == self.current.row
+        )
+        if matched:
+            self.matched = group
+        if self.fixed:
+            if matched and cell.allowed or self.fixed is group:
+                cell.color = RED
+
+    def set(self, current: ChessCell):
+        self.current = current
+        if self.getAllowed(current):
+            current.allowed = True
+            current.color = INDEXES[self.player]
+        else:
+            current.allowed = False
+
+    def getAllowed(self, current: ChessCell):
+        return (
+            self.fixed
+            and self.fixed.isChild(current)
+            and not current.index
+            or not current.index
+        )
+
+    def click(self, cell: ChessCell):
+        cell.index = self.player
+        self.player = 3 - self.player
+
+    def press(self):
+        pos = self.surface.getPos()
+        for cell in self.cells:
+            if cell.collidepoint(pos):
+                self.pressing = cell
+
+    def release(self):
+        pos = self.surface.getPos()
+        for cell in self.cells:
+            if cell.collidepoint(pos) and self.pressing is cell and cell.allowed:
+                self.click(cell)
+                self.fixed = self.matched
+                break
+        else:
+            self.pressing = None
+
+    @property
+    def cells(self):
         for group in self.groups:
-            group.matched = group.col == c and group.row == r
+            for cell in group.cells:
+                yield cell
 
     def update(self):
-        pressed = mouse.get_pressed()
         pos = self.surface.getPos()
         for group in self.groups:
-            group.update(pressed, pos)
+            for cell in group.cells:
+                cell.update()
+                self.match(group, cell)
+                if cell.collidepoint(pos):
+                    self.set(cell)
 
     def draw(self):
         for group in self.groups:
