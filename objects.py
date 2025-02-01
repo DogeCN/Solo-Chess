@@ -49,6 +49,11 @@ class ChessGroup:
     def isMatched(self, cell: ChessCell):
         return cell.col == self.col and cell.row == self.row
 
+    def setIndex(self, index):
+        self.index = index
+        for cell in self.cells:
+            cell.index = index
+
     def check(self):
         cells: list[list[ChessCell]] = [[] for _ in range(2)]
         for cell in self.cells:
@@ -68,8 +73,8 @@ class ChessGroup:
                     rdiagonals.add(cell.col - cell.row)
                 for prob in [rows, cols, ldiagonals, rdiagonals]:
                     if len(prob) == 1:
-                        self.index = i + 1
-                        return
+                        self.setIndex(i + 1)
+                        return True
 
     def draw(self):
         for cell in self.cells:
@@ -82,6 +87,7 @@ class Globals:
     current: ChessCell = None
     pressing: ChessCell = None
     player = 1
+    index = 0
 
     def __init__(self, surface: Screen):
         self.surface = surface
@@ -91,8 +97,36 @@ class Globals:
             for r in range(C_GROUP[1])
         ]
 
-    def get(self, col: int, row: int):
-        return self.cells[col + row * C_GROUP[0]]
+    def setIndex(self, index):
+        self.index = index
+        for group in self.groups:
+            group.setIndex(index)
+
+    def check(self):
+        res = False
+        groups: list[list[ChessGroup]] = [[] for _ in range(2)]
+        for group in self.groups:
+            if group.check():
+                res = True
+            if group.index:
+                groups[group.index - 1].append(group)
+        for i in range(2):
+            p = groups[i]
+            if len(p) >= 3:
+                rows = set()
+                cols = set()
+                ldiagonals = set()
+                rdiagonals = set()
+                for group in p:
+                    rows.add(group.row)
+                    cols.add(group.col)
+                    ldiagonals.add(group.col + group.row)
+                    rdiagonals.add(group.col - group.row)
+                for prob in [rows, cols, ldiagonals, rdiagonals]:
+                    if len(prob) == 1:
+                        self.setIndex(i + 1)
+                        return True
+        return res
 
     def press(self):
         if self.current and self.allow(self.current):
@@ -102,16 +136,16 @@ class Globals:
         current = self.current
         if self.pressing is current is not None:
             current.index = self.player
-            self.fixed = self.matched
             self.player = 3 - self.player
+            self.fixed = None if self.check() or self.matched.index else self.matched
         self.pressing = None
 
     def allow(self, cell: ChessCell):
         if self.fixed:
             return self.fixed.has(cell) and not cell.index
-        return True
+        return not cell.index
 
-    def color(self, group: ChessGroup, cell: ChessCell):
+    def color(self, cell: ChessCell):
         color = SILVER
         oncur = self.current is cell
         if self.matched and self.matched.has(cell):
@@ -128,10 +162,6 @@ class Globals:
                     color = INDEXES[self.player]
                 else:
                     color = RED
-        if group.index:
-            color = INDEXES[group.index]
-            if oncur:
-                color = RED
         cell.color = color
 
     def update(self):
@@ -143,7 +173,6 @@ class Globals:
                 if cell.collidepoint(pos):
                     self.current = cell
         for group in self.groups:
-            group.check()
             if (
                 self.current
                 and self.allow(self.current)
@@ -152,7 +181,7 @@ class Globals:
                 self.matched = group
         for group in self.groups:
             for cell in group.cells:
-                self.color(group, cell)
+                self.color(cell)
 
     def draw(self):
         for group in self.groups:
