@@ -1,6 +1,3 @@
-# Solo-Chess
- A Puzzled Solo Chess Game
+# Tic-Tic-Ku
 
-**Work in Progress**
-
-![Work in Progress](.pic/WIP.png "Dynamic Light")
+### Super Tic-Tac-Toe
