@@ -111,11 +111,10 @@ class Globals:
         res = False
         groups: list[list[ChessGroup]] = [[] for _ in range(3)]
         for group in self.groups:
-            index = group.index
-            if group.check() and not index:
+            if group.check() and not group.index:
                 res = True
-            if index:
-                groups[index - 1].append(group)
+            if group.index:
+                groups[group.index - 1].append(group)
         for i in range(2):
             p = groups[i]
             if len(p) >= CONST:
