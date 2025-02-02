@@ -140,11 +140,7 @@ class Globals:
         if self.pressing is current is not None:
             current.index = self.player
             self.player = len(INDEXES) - self.player
-            a1 = self.check()
-            a2 = self.matched.index
-            a = a1 or a2
-            self.fixed = None if a else self.matched
-            print(self.fixed, a, a1, a2)
+            self.fixed = None if self.check() or self.matched.index else self.matched
         self.pressing = None
 
     def allow(self, cell: ChessCell):
