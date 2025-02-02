@@ -55,7 +55,7 @@ class ChessGroup:
             cell.index = index
 
     def check(self):
-        cells: list[list[ChessCell]] = [[] for _ in range(2)]
+        cells: list[list[ChessCell]] = [[] for _ in range(3)]
         for cell in self.cells:
             if cell.index:
                 cells[cell.index - 1].append(cell)
@@ -69,10 +69,12 @@ class ChessGroup:
                     probs[2].append(cell.col + cell.row)
                     probs[3].append(cell.col - cell.row)
                 for prob in probs:
-                    for p in prob:
+                    for p in set(prob):
                         if prob.count(p) >= CONST:
                             self.setIndex(i + 1)
                             return True
+        if sum(map(len, cells)) == len(self.cells):
+            self.setIndex(3)
 
     def draw(self):
         for cell in self.cells:
@@ -107,12 +109,13 @@ class Globals:
 
     def check(self):
         res = False
-        groups: list[list[ChessGroup]] = [[] for _ in range(2)]
+        groups: list[list[ChessGroup]] = [[] for _ in range(3)]
         for group in self.groups:
-            if not group.index and group.check():
+            index = group.index
+            if group.check() and not index:
                 res = True
-            if group.index:
-                groups[group.index - 1].append(group)
+            if index:
+                groups[index - 1].append(group)
         for i in range(2):
             p = groups[i]
             if len(p) >= CONST:
@@ -123,10 +126,12 @@ class Globals:
                     probs[2].append(group.col + group.row)
                     probs[3].append(group.col - group.row)
                 for prob in probs:
-                    for p in prob:
+                    for p in set(prob):
                         if prob.count(p) >= CONST:
                             self.setIndex(i + 1)
                             return True
+        if sum(map(len, groups)) == len(self.groups):
+            self.setIndex(3)
         return res
 
     def press(self):
@@ -139,7 +144,7 @@ class Globals:
         current = self.current
         if self.pressing is current is not None:
             current.index = self.player
-            self.player = len(INDEXES) - self.player
+            self.player = 3 - self.player
             self.fixed = None if self.check() or self.matched.index else self.matched
         self.pressing = None
 
@@ -148,24 +153,26 @@ class Globals:
             return self.fixed.has(cell) and not cell.index
         return not cell.index
 
-    def color(self, cell: ChessCell):
-        color = SILVER
-        oncur = self.current is cell
-        if self.matched and self.matched.has(cell):
-            color = YELLOW
-        elif self.fixed and self.fixed.has(cell):
-            color = RED
-        if cell.index:
-            color = INDEXES[cell.index]
-            if oncur:
-                color = RED
-        else:
-            if oncur:
-                if self.allow(cell):
-                    color = INDEXES[self.player]
-                else:
+    def color(self):
+        for group in self.groups:
+            for cell in group.cells:
+                color = SILVER
+                oncur = self.current is cell
+                if self.matched and self.matched.has(cell):
+                    color = YELLOW
+                elif self.fixed and self.fixed.has(cell):
                     color = RED
-        cell.color = color
+                if cell.index:
+                    color = INDEXES[cell.index]
+                    if oncur:
+                        color = RED
+                else:
+                    if oncur:
+                        if self.allow(cell):
+                            color = INDEXES[self.player]
+                        else:
+                            color = RED
+                cell.color = color
 
     def update(self):
         self.matched = self.current = None
@@ -182,9 +189,7 @@ class Globals:
                 and group.isMatched(self.current)
             ):
                 self.matched = group
-        for group in self.groups:
-            for cell in group.cells:
-                self.color(cell)
+        self.color()
 
     def draw(self):
         for group in self.groups:

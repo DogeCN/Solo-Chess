@@ -1,3 +1,3 @@
 # Tic-Tic-Ku
 
-### Super Tic-Tac-Toe
+**Super Tic-Tac-Toe**
