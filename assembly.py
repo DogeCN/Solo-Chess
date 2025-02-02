@@ -1,5 +1,6 @@
 from pygame.event import Event
 from objects import *
+from sys import exit
 
 
 class GameAssembly:

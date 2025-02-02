@@ -2,7 +2,7 @@ WIDTH = 1156
 HEIGHT = 650
 SIZE = WIDTH, HEIGHT
 CENTER = WIDTH // 2, HEIGHT // 2
-CAPTION = "Solo Chess"
+CAPTION = "Tic Tac Ku"
 ICON = "icon.ico"
 FPS = 60
 
