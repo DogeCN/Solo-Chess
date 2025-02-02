@@ -3,6 +3,7 @@ HEIGHT = 650
 SIZE = WIDTH, HEIGHT
 CENTER = WIDTH // 2, HEIGHT // 2
 CAPTION = "Solo Chess"
+ICON = "icon.ico"
 FPS = 60
 
 CONST = 3
