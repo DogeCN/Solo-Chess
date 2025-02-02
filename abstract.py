@@ -18,7 +18,6 @@ class Screen(Surface):
         return [pos[i] * SIZE[i] // size[i] for i in range(2)]
 
     def draw(self):
-        display.set_icon(image.load(ICON))
         self.screen.blit(transform.smoothscale(self, self.screen.get_size()), (0, 0))
         drawGradient(self, SIZE, BLACK, GREY)
         display.flip()
