@@ -4,6 +4,7 @@ from abstract import *
 
 
 class ChessCell(AnimatedTrapezoid):
+    color = SILVER
     index = 0
 
     def __init__(self, group: "ChessGroup", surface: Screen, c, r):
@@ -16,15 +17,20 @@ class ChessCell(AnimatedTrapezoid):
     def drawGrid(self, color):
         if Mutable.LIGHT:
             color = self.light(color)
-        super().drawGrid(color)
-        if self.group.col and not self.col:
-            self.drawLine(self.topLeft, self.bottomLeft, color, BORDER_WIDTH)
-        if self.group.row and not self.row:
-            self.drawLine(self.topLeft, self.topRight, color, BORDER_WIDTH)
-
-    def update(self):
-        super().update()
-        self.color = SILVER
+        self.drawLine(
+            self.topLeft,
+            self.bottomLeft,
+            color,
+            BORDER_WIDTH if self.group.col and not self.col else LINE_WIDTH,
+        )
+        self.drawLine(
+            self.topLeft,
+            self.topRight,
+            color,
+            BORDER_WIDTH if self.group.row and not self.row else LINE_WIDTH,
+        )
+        self.drawLine(self.topRight, self.bottomRight, color)
+        self.drawLine(self.bottomRight, self.bottomLeft, color)
 
     def draw(self):
         super().draw(self.color)

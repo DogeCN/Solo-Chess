@@ -1,6 +1,6 @@
 from pygame.event import Event
 from objects import *
-from sys import exit
+import sys
 
 
 class GameAssembly:
@@ -47,4 +47,4 @@ class GameAssembly:
 
     def exit(self):
         quit()
-        exit()
+        sys.exit()

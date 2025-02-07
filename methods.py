@@ -1,11 +1,11 @@
 from pygame import *
 
 
-def triangle(x: int, y: int):
+def triangle(x: int, y: int) -> float:
     return (x**2 + y**2) ** 0.5
 
 
-def calcIntensity(pos: tuple[int, int], point: tuple[int, int], radius: int):
+def calcIntensity(pos: tuple[int, int], point: tuple[int, int], radius: int) -> float:
     delta = [pos[i] - point[i] for i in range(2)]
     return max(0, min(1, 1 - triangle(*delta) / radius))
 

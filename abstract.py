@@ -5,7 +5,7 @@ from values import *
 class Screen(Surface):
 
     def __init__(self):
-        super().__init__(SIZE, SRCALPHA)
+        super().__init__(SIZE, SRCALPHA | DOUBLEBUF)
         self.screen = display.set_mode(SIZE, RESIZABLE)
         display.set_caption(CAPTION)
 
@@ -103,12 +103,6 @@ class Trapezoid(Rect):
 
     def drawLine(self, start, end, color, width=LINE_WIDTH):
         draw.line(self.surface, color, start, end, width)
-
-    def drawGrid(self, color):
-        self.drawLine(self.topLeft, self.topRight, color)
-        self.drawLine(self.topRight, self.bottomRight, color)
-        self.drawLine(self.bottomRight, self.bottomLeft, color)
-        self.drawLine(self.bottomLeft, self.topLeft, color)
 
     def draw(self, color):
         draw.polygon(self.surface, color, self.points)
