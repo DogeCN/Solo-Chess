@@ -3,6 +3,9 @@ from values import *
 
 
 class Screen(Surface):
+    scsize = SIZE
+    resized = False
+    pos = CENTER
 
     def __init__(self):
         super().__init__(SIZE, SRCALPHA | DOUBLEBUF)
@@ -12,13 +15,18 @@ class Screen(Surface):
     def switchFull(self):
         display.toggle_fullscreen()
 
-    def getPos(self):
-        pos = list(mouse.get_pos())
-        size = self.screen.get_size()
-        return [pos[i] * SIZE[i] // size[i] for i in range(2)]
+    def mouseMoved(self):
+        pos = mouse.get_pos()
+        self.pos = [pos[i] * SIZE[i] // self.scsize[i] for i in range(2)]
 
     def draw(self):
-        self.screen.blit(transform.smoothscale(self, self.screen.get_size()), (0, 0))
+        if self.resized:
+            self.scsize = self.screen.get_size()
+            self.resized = False
+        self.screen.blit(
+            (self if self.scsize == SIZE else transform.smoothscale(self, self.scsize)),
+            (0, 0),
+        )
         drawGradient(self, SIZE, BLACK, GREY)
         display.flip()
 
@@ -44,7 +52,7 @@ class AnimatedTextGroup(Surface):
 
     def calcPos(self):
         size = self.get_bounding_rect().size
-        pos = self.surface.getPos()
+        pos = self.surface.pos
         return [
             self.pos[i]
             + min(SIZE[i] / (pos[i] + 1), MAX_DELTA_RATE) * size[i] * Mutable.SHRINK
@@ -133,11 +141,11 @@ class AnimatedTrapezoid(Trapezoid):
 
     def update(self):
         self.recover()
-        pos = self.surface.getPos()
+        pos = self.surface.pos
         self.resize(pos)
 
     def light(self, color):
-        pos = self.surface.getPos()
+        pos = self.surface.pos
         intensity = (
             sum(
                 calcIntensity(pos, point, Mutable.LIGHT_RADIUS) for point in self.points

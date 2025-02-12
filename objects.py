@@ -181,7 +181,7 @@ class Globals:
 
     def update(self):
         self.matched = self.current = None
-        pos = self.surface.getPos()
+        pos = self.surface.pos
         for group in self.groups:
             for cell in group.cells:
                 cell.update()
@@ -207,7 +207,7 @@ class Board(AnimatedTrapezoid):
         self.globals = Globals(surface)
 
     def offset(self):
-        pos = self.surface.getPos()
+        pos = self.surface.pos
         for i in range(4):
             point = list(self.points[i])
             for j in range(2):

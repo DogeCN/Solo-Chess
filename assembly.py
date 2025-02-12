@@ -4,6 +4,8 @@ import sys
 
 
 class GameAssembly:
+    enabled = True
+
     def __init__(self):
         init()
         self.surface = Screen()
@@ -14,6 +16,12 @@ class GameAssembly:
     def emit(self, e: Event):
         if e.type == QUIT:
             self.exit()
+        elif e.type == ACTIVEEVENT:
+            self.enabled = e.dict["gain"] and e.dict["state"]
+        elif e.type == MOUSEMOTION:
+            self.board.surface.mouseMoved()
+        elif e.type == VIDEORESIZE:
+            self.board.surface.resized = True
         elif e.type == MOUSEBUTTONDOWN and e.dict["button"] == BUTTON_LEFT:
             self.board.globals.press()
         elif e.type == MOUSEBUTTONUP and e.dict["button"] == BUTTON_LEFT:
@@ -35,15 +43,15 @@ class GameAssembly:
             elif Mutable.LIGHT:
                 Mutable.LIGHT_RADIUS += val * Mutable.LIGHT_RADIUS_SPEED
 
-    def update(self):
-        self.board.update()
-        self.texts.update(self.clock.get_fps())
-        self.clock.tick(FPS)
+    def __call__(self):
+        if self.enabled:
+            self.board.update()
+            self.texts.update(self.clock.get_fps())
+            self.clock.tick(FPS)
 
-    def draw(self):
-        self.surface.draw()
-        self.texts.draw()
-        self.board.draw()
+            self.surface.draw()
+            self.texts.draw()
+            self.board.draw()
 
     def exit(self):
         quit()
